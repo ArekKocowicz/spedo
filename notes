@@ -1,0 +1,189 @@
+counts impulses on RB3:
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <pic16lf1902.h>
+#include <xc.h>
+
+// CONFIG1
+#pragma config FOSC = INTOSC    // Oscillator Selection (INTOSC oscillator: I/O function on CLKIN pin)
+#pragma config WDTE = OFF       // Watchdog Timer Enable (WDT disabled)
+#pragma config PWRTE = OFF      // Power-up Timer Enable (PWRT disabled)
+#pragma config MCLRE = ON       // MCLR Pin Function Select (MCLR/VPP pin function is MCLR)
+#pragma config CP = OFF         // Flash Program Memory Code Protection (Program memory code protection is disabled)
+#pragma config BOREN = OFF      // Brown-out Reset Enable (Brown-out Reset disabled)
+#pragma config CLKOUTEN = OFF    // Clock Out Enable (CLKOUT function is enabled on the CLKOUT pin)
+
+// CONFIG2
+#pragma config WRT = OFF        // Flash Memory Self-Write Protection (Write protection off)
+#pragma config STVREN = ON      // Stack Overflow/Underflow Reset Enable (Stack Overflow or Underflow will cause a Reset)
+#pragma config BORV = HI        // Brown-out Reset Voltage Selection (Brown-out Reset Voltage (Vbor), high trip point selected.)
+#pragma config LPBOR = OFF      // Low-Power Brown-out Reset (Low-Power BOR is disabled)
+#pragma config LVP = ON         // Low-Voltage Programming Enable (Low-voltage programming enabled)
+
+#define _XTAL_FREQ (500000)
+
+#define SEG_A (1<<5)
+#define SEG_B (1<<4)
+#define SEG_C (1<<3)
+#define SEG_D (1<<2)
+#define SEG_E (1<<1)
+#define SEG_F (1<<6)
+#define SEG_G (1<<7)
+
+char digits[]={
+    SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F      , //0
+          SEG_B|SEG_C                        , //1
+    SEG_A|SEG_B|      SEG_D|SEG_E|      SEG_G, //2
+    SEG_A|SEG_B|SEG_C|SEG_D|            SEG_G, //3
+          SEG_B|SEG_C|            SEG_F|SEG_G, //4
+    SEG_A|      SEG_C|SEG_D|      SEG_F|SEG_G, //5
+    SEG_A|      SEG_C|SEG_D|SEG_E|SEG_F|SEG_G, //6
+    SEG_A|SEG_B|SEG_C                        , //7
+    SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F|SEG_G, //8
+    SEG_A|SEG_B|SEG_C|SEG_D|      SEG_F|SEG_G  //9
+};
+
+char i=0;
+
+
+void display(char speed)
+{
+    //TODO: some nicer way of maping segments would be needed here
+    if(speed/10!=0)
+        LCDDATA0=digits[speed/10];
+    else
+        LCDDATA0=0;
+
+    LCDDATA1=digits[speed%10];
+    if(LCDDATA1&SEG_C)
+        LCDDATA12bits.SEG24COM0=1;
+    else
+        LCDDATA12bits.SEG24COM0=0;
+}
+
+void main(void)
+
+{
+    OSCCONbits.IRCF=0; //drive micro from LFOSC 32kHz
+
+    OPTION_REGbits.TMR0CS=0; //fosc/4
+    OPTION_REGbits.PSA=0;    //divider assigned to the timer 0
+    OPTION_REGbits.PS=0;     //divider by 8 so the timer is counting ms
+
+    INTCONbits.GIE=1;        //turn the interrupts on
+    //INTCONbits.T0IF=0;
+    //INTCONbits.T0IE=1;     //turn on turn off timer
+
+    ANSELA=0;
+    ANSELB=0;
+    TRISB=0;
+    TRISA=0;
+
+    LCDCONbits.LCDEN=1;
+    LCDCONbits.WERR=0;
+    LCDCONbits.CS=2; //drive LCD from LFINTOSC
+    LCDCONbits.LMUX=0; // static mode
+
+    LCDPSbits.BIASMD=0; //
+    LCDPSbits.LCDA=1;
+    LCDPSbits.WA=1; //data register write enabled
+    LCDPSbits.LP=0; //prescaller by 2
+
+    LCDREFbits.LCDIRE=1; //internal ref enabled
+    LCDREFbits.VLCD1PE=0;
+    LCDCST=0;
+    LCDSE0=0xFF;
+    LCDSE1=0xF7; //enable SEG8, 9, 10,   12, 13, 14, 15 enabled
+    LCDSE3=0x01; //enable SEG24
+
+    LCDDATA0=0xFF;  //turn on all segments
+    LCDDATA1=0xF7;  //turn on all segments
+    LCDDATA12=0x01; //turn on seg 24
+
+    LCDRLbits.LRLAP=2;
+    LCDRLbits.LRLBP=2;
+
+    //configure input on change:
+    ANSELBbits.ANSB3=0;
+    TRISBbits.TRISB3=1;
+
+    INTCONbits.IOCIF=0;
+    INTCONbits.IOCIE=1;
+    IOCBFbits.IOCBF3=0;
+    IOCBNbits.IOCBN3=1;
+    IOCBPbits.IOCBP3=1;
+
+//Timer1 configuration
+    T1CONbits.TMR1CS=9;  //Timer1 clock source in system clock/4
+    T1CONbits.T1CKPS=3;  //prescaler by 8 so Timer 1 is counting miliseconds
+    T1CONbits.T1OSCEN=0; //disable external oscillator
+    T1GCONbits.TMR1GE=1; //Timer1 counting is controlled by the Timer1 gate function
+    T1GCONbits.T1GTM=1;  //Timer1 Gate Toggle mode is enabled
+
+
+
+    T1GCONbits.T1GGO_nDONE=1; //TImer1 gate single-pulse acquisition is ready, waiting for an edge
+    T1CONbits.TMR1ON=1;
+//
+    while(1)
+    {
+
+    }
+}
+
+
+void interrupt my_interrupt(void)
+{
+    OSCCONbits.IRCF=12;  //change clock to a faster one
+
+    //OPTION_REGbits.PS=7; //timer 0 slow down
+    //if(INTCONbits.T0IF)
+    //{
+    //    INTCONbits.T0IF=0;
+    //    TMR0=200;
+    //}
+    //INTCONbits.T0IF=0; //clear timer 0 interrupt flag
+    //TMR0=0;
+    //OPTION_REGbits.PS=0; //timer 0 back to
+
+    /*
+    if(INTCONbits.IOCIF)
+    {
+        if(IOCBFbits.IOCBF3)
+        {
+            IOCBFbits.IOCBF3=0;
+
+            i++;
+            if(i>99)
+                i=0;
+            if(INTCONbits.T0IF)
+            {
+                display(i);
+            }
+            else
+                display(TMR0);
+        }
+        INTCONbits.IOCIF=0;
+    }
+    */
+
+    OSCCONbits.IRCF=0; //and back to the slower clock
+}
+
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+    /*if(PIR1bits.TMR1IF)
+    {
+       PIR1bits.TMR1IF=0;
+       display(40);
+       //while(1)
+       {
+
+       }
+    }*/

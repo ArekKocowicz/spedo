@@ -10,9 +10,9 @@ CND_CONF=default
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/spedo.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-OUTPUT_BASENAME=spedo.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-PACKAGE_TOP_DIR=spedo.x/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/spedo.git.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+OUTPUT_BASENAME=spedo.git.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+PACKAGE_TOP_DIR=spedo.git/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/spedo.x/bin
+makeDirectory ${TMPDIR}/spedo.git/bin
 copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/spedo.x.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/spedo.git.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/spedo.x.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/spedo.git.tar *
 checkReturnCode
 
 # Cleanup

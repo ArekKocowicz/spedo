@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <pic16lf1902.h>
 
 // CONFIG1
@@ -40,32 +41,49 @@ char digits[]={
     SEG_A|SEG_B|SEG_C|SEG_D|      SEG_F|SEG_G  //9
 };
 
+#define WHEEL_CIRCUMFERENCE_CM (200)
+#define MAGNET_POLES_NUMBER (13)
+
+typedef enum
+{
+    DISPLAY_MODE_BLANK,
+    DISPLAY_MODE_NUMBER
+}display_mode_e;
+
 struct status_t
 {
     unsigned tick:1;
     unsigned dot:1;
 }status;
 
-int period;
+uint16_t timer1CountedTicks=UINT16_MAX;
+uint8_t speed;
 
 
-void display(char speed)
+void display(uint8_t number, display_mode_e mode)
 {
-    //TODO: some nicer way of maping segments would be needed here
-    if(speed/10!=0)
-        LCDDATA0=digits[speed/10];
+    if(mode==DISPLAY_MODE_NUMBER)
+    {
+        if(number/10!=0)
+            LCDDATA0=digits[number/10];
+        else
+            LCDDATA0=0;
+        LCDDATA1=digits[number%10];
+        if(LCDDATA1&SEG_C)
+            LCDDATA12bits.SEG24COM0=1;
+        else
+            LCDDATA12bits.SEG24COM0=0;
+    }
     else
-        LCDDATA0=0;
-    //TODO: brzydko tu jest, popraw ta obsluge kropki
+    {
+        LCDDATA0=SEG_G;
+        LCDDATA1=SEG_G;
+        LCDDATA12=0;
+    }
 
     if(status.dot)
-    LCDDATA0|=SEG_P;
+       LCDDATA0|=SEG_P;
 
-    LCDDATA1=digits[speed%10];
-    if(LCDDATA1&SEG_C)
-        LCDDATA12bits.SEG24COM0=1;
-    else
-        LCDDATA12bits.SEG24COM0=0;
 }
 
 void main(void)
@@ -78,6 +96,7 @@ void main(void)
     TRISA=0;
 
     //LCD configuration
+    display(0,DISPLAY_MODE_BLANK);
     OSCCONbits.IRCF=0;       //drive micro from LFOSC 32kHz
     INTCONbits.GIE=1;        //turn the interrupts on
     INTCONbits.PEIE=1;       //turn on peripheral interrupts
@@ -124,13 +143,18 @@ void main(void)
     T1GCONbits.T1GTM=1;  //Timer1 Gate Toggle mode is enabled
     T1CONbits.TMR1ON=1;
 
-    display(20);         //show that you got so far
     while(1)
     {
         if(status.tick)
         {
+            //speed=timer1CountedTicks/4;
+            speed=WHEEL_CIRCUMFERENCE_CM*36/(MAGNET_POLES_NUMBER*timer1CountedTicks/4);
             status.tick=0;
-            display(period/4);
+            if(speed>99)  //speed out of limit
+                display(0,DISPLAY_MODE_BLANK);
+            else           //speed within limit
+                display(speed,DISPLAY_MODE_NUMBER);
+            
             if(status.dot)
                 status.dot=0;
             else
@@ -147,8 +171,8 @@ void interrupt my_interrupt(void)
     if(PIR1bits.TMR1GIF)
     {
         PIR1bits.TMR1GIF=0;
-        period=TMR1L;
-        period|=(TMR1H<<8);
+        timer1CountedTicks=TMR1L;
+        timer1CountedTicks|=(TMR1H<<8);
         TMR1H=0;
         TMR1L=0;
     }

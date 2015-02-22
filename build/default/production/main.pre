@@ -137,6 +137,96 @@ extern char * ultoa(char * buf, unsigned long val, int base);
 
 extern char * ftoa(float f, int * status);
 
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.33\include\stdint.h"
+typedef signed char int8_t;
+
+# 20
+typedef signed int int16_t;
+
+# 28
+typedef signed short long int int24_t;
+
+# 36
+typedef signed long int int32_t;
+
+# 43
+typedef unsigned char uint8_t;
+
+# 49
+typedef unsigned int uint16_t;
+
+# 56
+typedef unsigned short long int uint24_t;
+
+# 63
+typedef unsigned long int uint32_t;
+
+# 71
+typedef signed char int_least8_t;
+
+# 78
+typedef signed int int_least16_t;
+
+# 90
+typedef signed short long int int_least24_t;
+
+# 98
+typedef signed long int int_least32_t;
+
+# 105
+typedef unsigned char uint_least8_t;
+
+# 111
+typedef unsigned int uint_least16_t;
+
+# 121
+typedef unsigned short long int uint_least24_t;
+
+# 128
+typedef unsigned long int uint_least32_t;
+
+# 137
+typedef signed char int_fast8_t;
+
+# 144
+typedef signed int int_fast16_t;
+
+# 156
+typedef signed short long int int_fast24_t;
+
+# 164
+typedef signed long int int_fast32_t;
+
+# 171
+typedef unsigned char uint_fast8_t;
+
+# 177
+typedef unsigned int uint_fast16_t;
+
+# 187
+typedef unsigned short long int uint_fast24_t;
+
+# 194
+typedef unsigned long int uint_fast32_t;
+
+# 200
+typedef int32_t intmax_t;
+
+
+
+
+typedef uint32_t uintmax_t;
+
+
+
+
+typedef int16_t intptr_t;
+
+
+
+
+typedef uint16_t uintptr_t;
+
 # 47 "C:\Program Files (x86)\Microchip\xc8\v1.33\include\pic16lf1902.h"
 extern volatile unsigned char INDF0 @ 0x000;
 
@@ -2434,19 +2524,61 @@ extern volatile __bit nWPUEN @ (((unsigned) &OPTION_REG)*8) + 7;
 #pragma config LPBOR = OFF
 #pragma config LVP = ON
 
-# 31
-char digits[]={
-(1<<5)|(1<<4)|(1<<3)|(1<<2)|(1<<1)|(1<<6) ,
-(1<<4)|(1<<3) ,
-(1<<5)|(1<<4)| (1<<2)|(1<<1)| (1<<7),
-(1<<5)|(1<<4)|(1<<3)|(1<<2)| (1<<7),
-(1<<4)|(1<<3)| (1<<6)|(1<<7),
-(1<<5)| (1<<3)|(1<<2)| (1<<6)|(1<<7),
-(1<<5)| (1<<3)|(1<<2)|(1<<1)|(1<<6)|(1<<7),
-(1<<5)|(1<<4)|(1<<3) ,
-(1<<5)|(1<<4)|(1<<3)|(1<<2)|(1<<1)|(1<<6)|(1<<7),
-(1<<5)|(1<<4)|(1<<3)|(1<<2)| (1<<6)|(1<<7)
+typedef enum
+{
+SEG_A=(1<<0),
+SEG_B=(1<<1),
+SEG_C=(1<<2),
+SEG_D=(1<<3),
+SEG_E=(1<<4),
+SEG_F=(1<<5),
+SEG_G=(1<<6),
+SEG_P=(1<<7)
+}segment_names;
+
+# 39
+const uint8_t segmentsToLCDDataRegisters[2][8]=
+{ {0*8+5,
+0*8+4,
+0*8+3,
+0*8+2,
+0*8+1,
+0*8+6,
+0*8+7,
+0*8+0},
+{1*8+5,
+1*8+4,
+12*8+0,
+1*8+2,
+1*8+1,
+1*8+6,
+1*8+7,
+1*8+0}
 };
+
+
+
+char charactersToSegments[]={
+SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F ,
+SEG_B|SEG_C ,
+SEG_A|SEG_B| SEG_D|SEG_E| SEG_G,
+SEG_A|SEG_B|SEG_C|SEG_D| SEG_G,
+SEG_B|SEG_C| SEG_F|SEG_G,
+SEG_A| SEG_C|SEG_D| SEG_F|SEG_G,
+SEG_A| SEG_C|SEG_D|SEG_E|SEG_F|SEG_G,
+SEG_A|SEG_B|SEG_C ,
+SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F|SEG_G,
+SEG_A|SEG_B|SEG_C|SEG_D| SEG_F|SEG_G
+};
+
+
+
+
+typedef enum
+{
+DISPLAY_MODE_BLANK,
+DISPLAY_MODE_NUMBER
+}display_mode_e;
 
 struct status_t
 {
@@ -2454,28 +2586,27 @@ unsigned tick:1;
 unsigned dot:1;
 }status;
 
-int period;
+uint16_t timer1CountedTicks=(65535U);
+uint8_t speed;
 
-
-void display(char speed)
+void lcdDisplay(uint8_t lcdCharacter, uint8_t lcdPosition)
 {
+uint8_t requiredSegments;
+uint8_t segmentsIndex;
+uint8_t segmentAddress;
 
-if(speed/10!=0)
-LCDDATA0=digits[speed/10];
+requiredSegments=charactersToSegments[lcdCharacter];
+for(segmentsIndex=0;segmentsIndex<8;segmentsIndex++)
+{
+segmentAddress=segmentsToLCDDataRegisters[lcdPosition][segmentsIndex];
+if(requiredSegments&(1<<segmentsIndex))
+*((&LCDDATA0)+segmentAddress/8)|=(1<<(segmentAddress%8));
 else
-LCDDATA0=0;
-
-
-if(status.dot)
-LCDDATA0|=(1<<0);
-
-LCDDATA1=digits[speed%10];
-if(LCDDATA1&(1<<3))
-LCDDATA12bits.SEG24COM0=1;
-else
-LCDDATA12bits.SEG24COM0=0;
+*((&LCDDATA0)+segmentAddress/8)&=~(1<<(segmentAddress%8));
+}
 }
 
+# 136
 void main(void)
 
 {
@@ -2484,6 +2615,7 @@ ANSELA=0;
 ANSELB=0;
 TRISB=0;
 TRISA=0;
+
 
 
 OSCCONbits.IRCF=0;
@@ -2532,17 +2664,25 @@ T1GCONbits.T1GPOL=1;
 T1GCONbits.T1GTM=1;
 T1CONbits.TMR1ON=1;
 
-display(20);
 while(1)
 {
 if(status.tick)
 {
 status.tick=0;
-display(period/4);
-if(status.dot)
-status.dot=0;
-else
-status.dot=1;
+
+# 211
+OPTION_REGbits.TMR0CS=1;
+OSCCONbits.IRCF=7;
+lcdDisplay(speed,0);
+lcdDisplay(speed,1);
+
+speed++;
+if(speed>9)
+speed=0;
+OSCCONbits.IRCF=0;
+OPTION_REGbits.TMR0CS=0;
+
+
 }
 }
 }
@@ -2550,13 +2690,13 @@ status.dot=1;
 
 void interrupt my_interrupt(void)
 {
-OSCCONbits.IRCF=12;
+
 
 if(PIR1bits.TMR1GIF)
 {
 PIR1bits.TMR1GIF=0;
-period=TMR1L;
-period|=(TMR1H<<8);
+timer1CountedTicks=TMR1L;
+timer1CountedTicks|=(TMR1H<<8);
 TMR1H=0;
 TMR1L=0;
 }
@@ -2567,5 +2707,5 @@ INTCONbits.TMR0IF=0;
 status.tick=1;
 }
 
-OSCCONbits.IRCF=0;
+
 }

@@ -31,7 +31,7 @@ counts impulses on RB3:
 #define SEG_F (1<<6)
 #define SEG_G (1<<7)
 
-char digits[]={
+char charactersToSegments[]={
     SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F      , //0
           SEG_B|SEG_C                        , //1
     SEG_A|SEG_B|      SEG_D|SEG_E|      SEG_G, //2
@@ -51,11 +51,11 @@ void display(char speed)
 {
     //TODO: some nicer way of maping segments would be needed here
     if(speed/10!=0)
-        LCDDATA0=digits[speed/10];
+        LCDDATA0=charactersToSegments[speed/10];
     else
         LCDDATA0=0;
 
-    LCDDATA1=digits[speed%10];
+    LCDDATA1=charactersToSegments[speed%10];
     if(LCDDATA1&SEG_C)
         LCDDATA12bits.SEG24COM0=1;
     else

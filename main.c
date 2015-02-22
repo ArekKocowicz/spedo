@@ -19,16 +19,45 @@
 #pragma config LPBOR = OFF      // Low-Power Brown-out Reset (Low-Power BOR is disabled)
 #pragma config LVP = ON         // Low-Voltage Programming Enable (Low-voltage programming enabled)
 
-#define SEG_P (1<<0)
-#define SEG_A (1<<5)
-#define SEG_B (1<<4)
-#define SEG_C (1<<3)
-#define SEG_D (1<<2)
-#define SEG_E (1<<1)
-#define SEG_F (1<<6)
-#define SEG_G (1<<7)
+typedef enum
+{
+    SEG_A=(1<<0),
+    SEG_B=(1<<1),
+    SEG_C=(1<<2),
+    SEG_D=(1<<3),
+    SEG_E=(1<<4),
+    SEG_F=(1<<5),
+    SEG_G=(1<<6),
+    SEG_P=(1<<7)
+}segment_names;
 
-char digits[]={
+/*
+ * value = segmentsToLCDDataRegisters[p][s]
+ * p - position on the display (first or second character)
+ * s - segment for which DATA register addres is searched
+ */
+const uint8_t segmentsToLCDDataRegisters[2][8]=
+{   {0*8+5,  //LCDDATA0, bit 5, first digit, SEG_A
+     0*8+4,  //LCDDATA0, bit 4, first digit, SEG_B
+     0*8+3,  //LCDDATA0, bit 3, first digit, SEG_C
+     0*8+2,  //LCDDATA0, bit 2, first digit, SEG_D
+     0*8+1,  //LCDDATA0, bit 1, first digit, SEG_E
+     0*8+6,  //LCDDATA0, bit 6, first digit, SEG_F
+     0*8+7,  //LCDDATA0, bit 7, first digit, SEG_G
+     0*8+0}, //LCDDATA0, bit 0, first digit, SEG_DP
+    {1*8+5,  //LCDDATA1, bit 5, second digit, SEG_A
+     1*8+4,  //LCDDATA1, bit 4, second digit, SEG_B
+     12*8+0, //LCDDATA12, bit 0, second digit, SEG_C
+     1*8+2,  //LCDDATA1, bit 2, second digit, SEG_D
+     1*8+1,  //LCDDATA1, bit 1, second digit, SEG_E
+     1*8+6,  //LCDDATA1, bit 6, second digit, SEG_F
+     1*8+7,  //LCDDATA1, bit 7, second digit, SEG_G
+     1*8+0}  //LCDDATA1, bit 0, second digit, SEG_DP
+};
+
+//following table shows which segments have to be activated to
+//display different characters like numbers and some letters
+char charactersToSegments[]={
     SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F      , //0
           SEG_B|SEG_C                        , //1
     SEG_A|SEG_B|      SEG_D|SEG_E|      SEG_G, //2
@@ -59,18 +88,36 @@ struct status_t
 uint16_t timer1CountedTicks=UINT16_MAX;
 uint8_t speed;
 
+void lcdDisplay(uint8_t lcdCharacter, uint8_t lcdPosition)
+{   
+    uint8_t requiredSegments;
+    uint8_t segmentsIndex;
+    uint8_t segmentAddress;
 
+        requiredSegments=charactersToSegments[lcdCharacter];    //check which segments to activate
+        for(segmentsIndex=0;segmentsIndex<8;segmentsIndex++)                     //go through all possible segments
+        {
+            segmentAddress=segmentsToLCDDataRegisters[lcdPosition][segmentsIndex];         //look up for address of that segment
+            if(requiredSegments&(1<<segmentsIndex))                              //if this segment should be activated
+                *((&LCDDATA0)+segmentAddress/8)|=(1<<(segmentAddress%8));        //decode address and write one to that register
+            else
+                *((&LCDDATA0)+segmentAddress/8)&=~(1<<(segmentAddress%8));       //decode address and write one to that register
+        }
+}
+
+/*
 void display(uint8_t number, display_mode_e mode)
 {
     if(mode==DISPLAY_MODE_NUMBER)
     {
         if(number/10!=0)
-            LCDDATA0=digits[number/10];
+            LCDDATA0=charactersToSegments[number/10];
         else
             LCDDATA0=0;
-        LCDDATA1=digits[number%10];
+        LCDDATA1=charactersToSegments[number%10];
         if(LCDDATA1&SEG_C)
             LCDDATA12bits.SEG24COM0=1;
+            
         else
             LCDDATA12bits.SEG24COM0=0;
     }
@@ -83,8 +130,8 @@ void display(uint8_t number, display_mode_e mode)
 
     if(status.dot)
        LCDDATA0|=SEG_P;
-
 }
+*/
 
 void main(void)
 
@@ -96,7 +143,7 @@ void main(void)
     TRISA=0;
 
     //LCD configuration
-    display(0,DISPLAY_MODE_BLANK);
+    //display(0,DISPLAY_MODE_BLANK);
     OSCCONbits.IRCF=0;       //drive micro from LFOSC 32kHz
     INTCONbits.GIE=1;        //turn the interrupts on
     INTCONbits.PEIE=1;       //turn on peripheral interrupts
@@ -147,9 +194,10 @@ void main(void)
     {
         if(status.tick)
         {
-            //speed=timer1CountedTicks/4;
-            speed=WHEEL_CIRCUMFERENCE_CM*36/(MAGNET_POLES_NUMBER*timer1CountedTicks/4);
             status.tick=0;
+            /*speed=timer1CountedTicks/4;
+            //speed=WHEEL_CIRCUMFERENCE_CM*36/(MAGNET_POLES_NUMBER*timer1CountedTicks/4);
+            
             if(speed>99)  //speed out of limit
                 display(0,DISPLAY_MODE_BLANK);
             else           //speed within limit
@@ -159,6 +207,19 @@ void main(void)
                 status.dot=0;
             else
                 status.dot=1;
+            */
+            OPTION_REGbits.TMR0CS=1; //disable timer 0
+            OSCCONbits.IRCF=7;       //change clock to a faster one
+            lcdDisplay(speed,0);
+            lcdDisplay(speed,1);
+            
+            speed++;
+            if(speed>9)
+                speed=0;
+            OSCCONbits.IRCF=0;       //and back to the slower clock
+            OPTION_REGbits.TMR0CS=0; //enable timer 0
+
+
         }
     }
 }
@@ -166,8 +227,6 @@ void main(void)
 
 void interrupt my_interrupt(void)
 {
-    OSCCONbits.IRCF=12;  //change clock to a faster one
-
     if(PIR1bits.TMR1GIF)
     {
         PIR1bits.TMR1GIF=0;
@@ -182,6 +241,4 @@ void interrupt my_interrupt(void)
         INTCONbits.TMR0IF=0;
         status.tick=1;
     }
-
-    OSCCONbits.IRCF=0; //and back to the slower clock
 }

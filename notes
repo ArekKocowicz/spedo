@@ -187,3 +187,64 @@ void interrupt my_interrupt(void)
 
        }
     }*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+            /*speed=timer1CountedTicks/4;
+            //speed=WHEEL_CIRCUMFERENCE_CM*36/(MAGNET_POLES_NUMBER*timer1CountedTicks/4);
+
+            if(speed>99)  //speed out of limit
+                display(0,DISPLAY_MODE_BLANK);
+            else           //speed within limit
+                display(speed,DISPLAY_MODE_NUMBER);
+
+            if(status.dot)
+                status.dot=0;
+            else
+                status.dot=1;
+            */
+
+
+/*
+void display(uint8_t number, display_mode_e mode)
+{
+    if(mode==DISPLAY_MODE_NUMBER)
+    {
+        if(number/10!=0)
+            LCDDATA0=charactersToSegments[number/10];
+        else
+            LCDDATA0=0;
+        LCDDATA1=charactersToSegments[number%10];
+        if(LCDDATA1&SEG_C)
+            LCDDATA12bits.SEG24COM0=1;
+
+        else
+            LCDDATA12bits.SEG24COM0=0;
+    }
+    else
+    {
+        LCDDATA0=SEG_G;
+        LCDDATA1=SEG_G;
+        LCDDATA12=0;
+    }
+
+    if(status.dot)
+       LCDDATA0|=SEG_P;
+}
+*/

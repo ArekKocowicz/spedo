@@ -14,6 +14,8 @@
                    projectFiles="true">
       <itemPath>main.c</itemPath>
       <itemPath>notes</itemPath>
+      <itemPath>lcd.c</itemPath>
+      <itemPath>lcd.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

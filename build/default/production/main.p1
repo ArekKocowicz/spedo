@@ -1,7 +1,10 @@
 Version 3.2 HI-TECH Software Intermediate Code
 "32 main.c
-[s S203 :1 `uc 1 ]
-[n S203 status_t tick ]
+[s S204 :1 `uc 1 ]
+[n S204 status_t tick ]
+"30 lcd.h
+[s S203 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S203 . number dot1 dot2 blank ]
 [p mainexit ]
 "1914 C:\Program Files (x86)\Microchip\xc8\v1.33\include\pic16lf1902.h
 [v _ANSELA `Vuc ~T0 @X0 0 e@396 ]
@@ -11,7 +14,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [v _TRISB `Vuc ~T0 @X0 0 e@141 ]
 "884
 [v _TRISA `Vuc ~T0 @X0 0 e@140 ]
-"82 lcd.h
+"125 lcd.h
 [v _lcdInit `(v ~T0 @X0 0 ef ]
 "341 C:\Program Files (x86)\Microchip\xc8\v1.33\include\pic16lf1902.h
 [s S32 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
@@ -88,11 +91,8 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S76 . . . ]
 "1349
 [v _OSCCONbits `VS76 ~T0 @X0 0 e@153 ]
-"24 lcd.h
-[s S202 :4 `uc 1 :1 `uc 1 ]
-[n S202 . character dot ]
-"84
-[v _lcdDisplay `(v ~T0 @X0 0 ef2`S202`uc ]
+"126 lcd.h
+[v _lcdDisplayAll `(v ~T0 @X0 0 ef1`S203 ]
 [; ;stdio.h: 8: typedef int ptrdiff_t;
 [; ;stdio.h: 9: typedef unsigned size_t;
 [; ;stdio.h: 10: typedef unsigned short wchar_t;
@@ -1876,8 +1876,15 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;lcd.h: 25: unsigned character:4;
 [; ;lcd.h: 26: unsigned dot:1;
 [; ;lcd.h: 27: }lcd_character_t;
-[; ;lcd.h: 82: extern void lcdInit(void);
-[; ;lcd.h: 84: extern void lcdDisplay(lcd_character_t character, uint8_t lcdPosition);
+[; ;lcd.h: 29: typedef struct
+[; ;lcd.h: 30: {
+[; ;lcd.h: 31: uint8_t number;
+[; ;lcd.h: 32: unsigned dot1:1;
+[; ;lcd.h: 33: unsigned dot2:1;
+[; ;lcd.h: 34: unsigned blank:1;
+[; ;lcd.h: 35: }lcd_display_t;
+[; ;lcd.h: 125: extern void lcdInit(void);
+[; ;lcd.h: 126: extern void lcdDisplayAll(lcd_display_t display);
 "8 main.c
 [p x FOSC=INTOSC ]
 "9
@@ -1908,7 +1915,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;main.c: 29: DISPLAY_MODE_NUMBER
 [; ;main.c: 30: }display_mode_e;
 "35
-[v _status `S203 ~T0 @X0 1 e ]
+[v _status `S204 ~T0 @X0 1 e ]
 [; ;main.c: 32: struct status_t
 [; ;main.c: 33: {
 [; ;main.c: 34: unsigned tick:1;
@@ -1922,201 +1929,188 @@ Version 3.2 HI-TECH Software Intermediate Code
 "38
 [v _speed `uc ~T0 @X0 1 e ]
 [; ;main.c: 38: uint8_t speed;
-"41
-[v _main `(v ~T0 @X0 1 ef ]
+"40
+[v _display `S203 ~T0 @X0 1 e ]
+[; ;main.c: 40: lcd_display_t display;
 "42
+[v _main `(v ~T0 @X0 1 ef ]
+"43
 {
-[; ;main.c: 41: void main(void)
-[; ;main.c: 42: {
+[; ;main.c: 42: void main(void)
+[; ;main.c: 43: {
 [e :U _main ]
 [f ]
-[; ;main.c: 44: ANSELA=0;
-"44
-[e = _ANSELA -> -> 0 `i `uc ]
-[; ;main.c: 45: ANSELB=0;
+[; ;main.c: 45: ANSELA=0;
 "45
-[e = _ANSELB -> -> 0 `i `uc ]
-[; ;main.c: 46: TRISB=0;
+[e = _ANSELA -> -> 0 `i `uc ]
+[; ;main.c: 46: ANSELB=0;
 "46
-[e = _TRISB -> -> 0 `i `uc ]
-[; ;main.c: 47: TRISA=0;
+[e = _ANSELB -> -> 0 `i `uc ]
+[; ;main.c: 47: TRISB=0;
 "47
+[e = _TRISB -> -> 0 `i `uc ]
+[; ;main.c: 48: TRISA=0;
+"48
 [e = _TRISA -> -> 0 `i `uc ]
-[; ;main.c: 49: lcdInit();
-"49
+[; ;main.c: 50: lcdInit();
+"50
 [e ( _lcdInit ..  ]
-[; ;main.c: 51: INTCONbits.TMR0IF=0;
-"51
-[e = . . _INTCONbits 0 2 -> -> 0 `i `uc ]
-[; ;main.c: 52: INTCONbits.TMR0IE=1;
+[; ;main.c: 52: INTCONbits.TMR0IF=0;
 "52
-[e = . . _INTCONbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 53: OPTION_REGbits.TMR0CS=0;
+[e = . . _INTCONbits 0 2 -> -> 0 `i `uc ]
+[; ;main.c: 53: INTCONbits.TMR0IE=1;
 "53
-[e = . . _OPTION_REGbits 0 5 -> -> 0 `i `uc ]
-[; ;main.c: 54: OPTION_REGbits.PSA=0;
+[e = . . _INTCONbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 54: OPTION_REGbits.TMR0CS=0;
 "54
-[e = . . _OPTION_REGbits 0 3 -> -> 0 `i `uc ]
-[; ;main.c: 55: OPTION_REGbits.PS=3;
-"55
-[e = . . _OPTION_REGbits 1 0 -> -> 3 `i `uc ]
-[; ;main.c: 58: TMR1H=0;
-"58
-[e = _TMR1H -> -> 0 `i `uc ]
-[; ;main.c: 59: TMR1L=0;
-"59
-[e = _TMR1L -> -> 0 `i `uc ]
-[; ;main.c: 60: PIR1bits.TMR1GIF=0;
-"60
-[e = . . _PIR1bits 0 3 -> -> 0 `i `uc ]
-[; ;main.c: 61: PIE1bits.TMR1GIE=1;
-"61
-[e = . . _PIE1bits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 62: T1CONbits.TMR1CS=2;
-"62
-[e = . . _T1CONbits 1 2 -> -> 2 `i `uc ]
-[; ;main.c: 63: T1CONbits.T1OSCEN=1;
-"63
-[e = . . _T1CONbits 0 3 -> -> 1 `i `uc ]
-[; ;main.c: 65: T1CONbits.T1CKPS=3;
-"65
-[e = . . _T1CONbits 1 1 -> -> 3 `i `uc ]
-[; ;main.c: 66: T1CONbits.nT1SYNC=1;
-"66
-[e = . . _T1CONbits 0 2 -> -> 1 `i `uc ]
-[; ;main.c: 67: T1GCONbits.T1GSS=0;
-"67
-[e = . . _T1GCONbits 1 0 -> -> 0 `i `uc ]
-[; ;main.c: 68: T1GCONbits.TMR1GE=1;
-"68
-[e = . . _T1GCONbits 0 7 -> -> 1 `i `uc ]
-[; ;main.c: 69: T1GCONbits.T1GPOL=1;
-"69
-[e = . . _T1GCONbits 0 6 -> -> 1 `i `uc ]
-[; ;main.c: 70: T1GCONbits.T1GTM=1;
-"70
-[e = . . _T1GCONbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 71: T1CONbits.TMR1ON=1;
-"71
-[e = . . _T1CONbits 0 0 -> -> 1 `i `uc ]
-[; ;main.c: 73: while(1)
-"73
-[e :U 206 ]
-[; ;main.c: 74: {
-"74
-{
-[; ;main.c: 75: if(status.tick)
-"75
-[e $ ! != -> . _status 0 `i -> -> -> 0 `i `uc `i 208  ]
-[; ;main.c: 76: {
-"76
-{
-[; ;main.c: 77: status.tick=0;
-"77
-[e = . _status 0 -> -> 0 `i `uc ]
-[; ;main.c: 79: OPTION_REGbits.TMR0CS=1;
-"79
-[e = . . _OPTION_REGbits 0 5 -> -> 1 `i `uc ]
-[; ;main.c: 80: OSCCONbits.IRCF=7;
-"80
-[e = . . _OSCCONbits 1 2 -> -> 7 `i `uc ]
-"81
-[v _testCharacter `S202 ~T0 @X0 1 a ]
-[; ;main.c: 81: lcd_character_t testCharacter;
-[; ;main.c: 83: testCharacter.character=speed;
-"83
-[e = . _testCharacter 0 _speed ]
-[; ;main.c: 84: testCharacter.dot=~testCharacter.dot;
-"84
-[e = . _testCharacter 1 -> ~ -> . _testCharacter 1 `i `uc ]
-[; ;main.c: 85: lcdDisplay(testCharacter,0);
-"85
-[e ( _lcdDisplay (2 , _testCharacter -> -> 0 `i `uc ]
-[; ;main.c: 86: lcdDisplay(testCharacter,1);
-"86
-[e ( _lcdDisplay (2 , _testCharacter -> -> 1 `i `uc ]
-[; ;main.c: 88: speed++;
-"88
-[e ++ _speed -> -> 1 `i `uc ]
-[; ;main.c: 89: if(speed>9)
-"89
-[e $ ! > -> _speed `i -> 9 `i 209  ]
-[; ;main.c: 90: speed=0;
-"90
-[e = _speed -> -> 0 `i `uc ]
-[e :U 209 ]
-[; ;main.c: 91: OSCCONbits.IRCF=0;
-"91
-[e = . . _OSCCONbits 1 2 -> -> 0 `i `uc ]
-[; ;main.c: 92: OPTION_REGbits.TMR0CS=0;
-"92
 [e = . . _OPTION_REGbits 0 5 -> -> 0 `i `uc ]
-"94
-}
-[e :U 208 ]
-"95
-}
-[e :U 205 ]
-"73
-[e $U 206  ]
+[; ;main.c: 55: OPTION_REGbits.PSA=0;
+"55
+[e = . . _OPTION_REGbits 0 3 -> -> 0 `i `uc ]
+[; ;main.c: 56: OPTION_REGbits.PS=3;
+"56
+[e = . . _OPTION_REGbits 1 0 -> -> 3 `i `uc ]
+[; ;main.c: 59: TMR1H=0;
+"59
+[e = _TMR1H -> -> 0 `i `uc ]
+[; ;main.c: 60: TMR1L=0;
+"60
+[e = _TMR1L -> -> 0 `i `uc ]
+[; ;main.c: 61: PIR1bits.TMR1GIF=0;
+"61
+[e = . . _PIR1bits 0 3 -> -> 0 `i `uc ]
+[; ;main.c: 62: PIE1bits.TMR1GIE=1;
+"62
+[e = . . _PIE1bits 0 3 -> -> 1 `i `uc ]
+[; ;main.c: 63: T1CONbits.TMR1CS=2;
+"63
+[e = . . _T1CONbits 1 2 -> -> 2 `i `uc ]
+[; ;main.c: 64: T1CONbits.T1OSCEN=1;
+"64
+[e = . . _T1CONbits 0 3 -> -> 1 `i `uc ]
+[; ;main.c: 66: T1CONbits.T1CKPS=3;
+"66
+[e = . . _T1CONbits 1 1 -> -> 3 `i `uc ]
+[; ;main.c: 67: T1CONbits.nT1SYNC=1;
+"67
+[e = . . _T1CONbits 0 2 -> -> 1 `i `uc ]
+[; ;main.c: 68: T1GCONbits.T1GSS=0;
+"68
+[e = . . _T1GCONbits 1 0 -> -> 0 `i `uc ]
+[; ;main.c: 69: T1GCONbits.TMR1GE=1;
+"69
+[e = . . _T1GCONbits 0 7 -> -> 1 `i `uc ]
+[; ;main.c: 70: T1GCONbits.T1GPOL=1;
+"70
+[e = . . _T1GCONbits 0 6 -> -> 1 `i `uc ]
+[; ;main.c: 71: T1GCONbits.T1GTM=1;
+"71
+[e = . . _T1GCONbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 72: T1CONbits.TMR1ON=1;
+"72
+[e = . . _T1CONbits 0 0 -> -> 1 `i `uc ]
+[; ;main.c: 74: while(1)
+"74
 [e :U 207 ]
-[; ;main.c: 94: }
-[; ;main.c: 95: }
-[; ;main.c: 96: }
-"96
-[e :UE 204 ]
-}
-[v F1996 `(v ~T0 @X0 1 tf ]
-"99
-[v _my_interrupt `IF1996 ~T0 @X0 1 e ]
-"100
+[; ;main.c: 75: {
+"75
 {
-[; ;main.c: 99: void interrupt my_interrupt(void)
-[; ;main.c: 100: {
+[; ;main.c: 76: if(status.tick)
+"76
+[e $ ! != -> . _status 0 `i -> -> -> 0 `i `uc `i 209  ]
+[; ;main.c: 77: {
+"77
+{
+[; ;main.c: 78: status.tick=0;
+"78
+[e = . _status 0 -> -> 0 `i `uc ]
+[; ;main.c: 80: OPTION_REGbits.TMR0CS=1;
+"80
+[e = . . _OPTION_REGbits 0 5 -> -> 1 `i `uc ]
+[; ;main.c: 81: OSCCONbits.IRCF=7;
+"81
+[e = . . _OSCCONbits 1 2 -> -> 7 `i `uc ]
+[; ;main.c: 93: display.number=timer1CountedTicks/4;
+"93
+[e = . _display 0 -> / _timer1CountedTicks -> -> 4 `i `ui `uc ]
+[; ;main.c: 94: display.dot1=~display.dot1;
+"94
+[e = . _display 1 -> ~ -> . _display 1 `i `uc ]
+[; ;main.c: 95: lcdDisplayAll(display);
+"95
+[e ( _lcdDisplayAll (1 _display ]
+[; ;main.c: 97: OSCCONbits.IRCF=0;
+"97
+[e = . . _OSCCONbits 1 2 -> -> 0 `i `uc ]
+[; ;main.c: 98: OPTION_REGbits.TMR0CS=0;
+"98
+[e = . . _OPTION_REGbits 0 5 -> -> 0 `i `uc ]
+"99
+}
+[e :U 209 ]
+"100
+}
+[e :U 206 ]
+"74
+[e $U 207  ]
+[e :U 208 ]
+[; ;main.c: 99: }
+[; ;main.c: 100: }
+[; ;main.c: 101: }
+"101
+[e :UE 205 ]
+}
+[v F2001 `(v ~T0 @X0 1 tf ]
+"104
+[v _my_interrupt `IF2001 ~T0 @X0 1 e ]
+"105
+{
+[; ;main.c: 104: void interrupt my_interrupt(void)
+[; ;main.c: 105: {
 [e :U _my_interrupt ]
 [f ]
-[; ;main.c: 101: if(PIR1bits.TMR1GIF)
-"101
-[e $ ! != -> . . _PIR1bits 0 3 `i -> -> -> 0 `i `Vuc `i 211  ]
-[; ;main.c: 102: {
-"102
-{
-[; ;main.c: 103: PIR1bits.TMR1GIF=0;
-"103
-[e = . . _PIR1bits 0 3 -> -> 0 `i `uc ]
-[; ;main.c: 104: timer1CountedTicks=TMR1L;
-"104
-[e = _timer1CountedTicks -> _TMR1L `ui ]
-[; ;main.c: 105: timer1CountedTicks|=(TMR1H<<8);
-"105
-[e =| _timer1CountedTicks -> << -> _TMR1H `i -> 8 `i `ui ]
-[; ;main.c: 106: TMR1H=0;
+[; ;main.c: 106: if(PIR1bits.TMR1GIF)
 "106
-[e = _TMR1H -> -> 0 `i `uc ]
-[; ;main.c: 107: TMR1L=0;
+[e $ ! != -> . . _PIR1bits 0 3 `i -> -> -> 0 `i `Vuc `i 211  ]
+[; ;main.c: 107: {
 "107
-[e = _TMR1L -> -> 0 `i `uc ]
+{
+[; ;main.c: 108: PIR1bits.TMR1GIF=0;
 "108
+[e = . . _PIR1bits 0 3 -> -> 0 `i `uc ]
+[; ;main.c: 109: timer1CountedTicks=TMR1L;
+"109
+[e = _timer1CountedTicks -> _TMR1L `ui ]
+[; ;main.c: 110: timer1CountedTicks|=(TMR1H<<8);
+"110
+[e =| _timer1CountedTicks -> << -> _TMR1H `i -> 8 `i `ui ]
+[; ;main.c: 111: TMR1H=0;
+"111
+[e = _TMR1H -> -> 0 `i `uc ]
+[; ;main.c: 112: TMR1L=0;
+"112
+[e = _TMR1L -> -> 0 `i `uc ]
+"113
 }
 [e :U 211 ]
-[; ;main.c: 108: }
-[; ;main.c: 110: if(INTCONbits.TMR0IF)
-"110
+[; ;main.c: 113: }
+[; ;main.c: 115: if(INTCONbits.TMR0IF)
+"115
 [e $ ! != -> . . _INTCONbits 0 2 `i -> -> -> 0 `i `Vuc `i 212  ]
-[; ;main.c: 111: {
-"111
+[; ;main.c: 116: {
+"116
 {
-[; ;main.c: 112: INTCONbits.TMR0IF=0;
-"112
+[; ;main.c: 117: INTCONbits.TMR0IF=0;
+"117
 [e = . . _INTCONbits 0 2 -> -> 0 `i `uc ]
-[; ;main.c: 113: status.tick=1;
-"113
+[; ;main.c: 118: status.tick=1;
+"118
 [e = . _status 0 -> -> 1 `i `uc ]
-"114
+"119
 }
 [e :U 212 ]
-[; ;main.c: 114: }
-[; ;main.c: 115: }
-"115
+[; ;main.c: 119: }
+[; ;main.c: 120: }
+"120
 [e :UE 210 ]
 }

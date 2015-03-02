@@ -1,8 +1,31 @@
 #define MODULE_LCD
 #include "lcd.h"
 
-//void lcdDisplay(uint8_t lcdCharacter, uint8_t lcdPosition)
-void lcdDisplay(lcd_character_t character, uint8_t lcdPosition)
+
+void lcdDisplayAll(lcd_display_t display)
+{
+    lcd_character_t character0, character1;
+
+    if(display.blank)
+    { 
+        character0.character=10;
+        character0.character=10;
+    }
+    else
+    {
+        character0.character=display.number/10;
+        character1.character=display.number%10;
+        if(character0.character==0)
+            character0.character=11;
+
+    }
+    character0.dot=display.dot1;
+    character1.dot=display.dot2;
+    lcdDisplayCharacter(character0, 0);
+    lcdDisplayCharacter(character1, 1);
+}
+
+void lcdDisplayCharacter(lcd_character_t character, uint8_t lcdPosition)
 {
     uint8_t requiredSegments;
     uint8_t segmentsIndex;

@@ -2539,10 +2539,17 @@ unsigned character:4;
 unsigned dot:1;
 }lcd_character_t;
 
-# 82
-extern void lcdInit(void);
+typedef struct
+{
+uint8_t number;
+unsigned dot1:1;
+unsigned dot2:1;
+unsigned blank:1;
+}lcd_display_t;
 
-extern void lcdDisplay(lcd_character_t character, uint8_t lcdPosition);
+# 125
+extern void lcdInit(void);
+extern void lcdDisplayAll(lcd_display_t display);
 
 
 # 8 "main.c"
@@ -2578,6 +2585,7 @@ unsigned tick:1;
 uint16_t timer1CountedTicks=(65535U);
 uint8_t speed;
 
+lcd_display_t display;
 
 void main(void)
 {
@@ -2619,19 +2627,14 @@ status.tick=0;
 
 OPTION_REGbits.TMR0CS=1;
 OSCCONbits.IRCF=7;
-lcd_character_t testCharacter;
 
-testCharacter.character=speed;
-testCharacter.dot=~testCharacter.dot;
-lcdDisplay(testCharacter,0);
-lcdDisplay(testCharacter,1);
+# 93
+display.number=timer1CountedTicks/4;
+display.dot1=~display.dot1;
+lcdDisplayAll(display);
 
-speed++;
-if(speed>9)
-speed=0;
 OSCCONbits.IRCF=0;
 OPTION_REGbits.TMR0CS=0;
-
 }
 }
 }

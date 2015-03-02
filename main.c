@@ -36,7 +36,8 @@ struct status_t
 
 uint16_t timer1CountedTicks=UINT16_MAX;
 uint8_t speed;
-
+//lcd_character_t testCharacter;
+lcd_display_t display;
 
 void main(void)
 {
@@ -77,17 +78,22 @@ void main(void)
             status.tick=0;
 
             OPTION_REGbits.TMR0CS=1; //disable timer 0
-            OSCCONbits.IRCF=7;       //change clock to a faster one
-            lcd_character_t testCharacter;
-            
-            testCharacter.character=speed;
-            testCharacter.dot=~testCharacter.dot;
-            lcdDisplay(testCharacter,0);
-            lcdDisplay(testCharacter,1);
+            OSCCONbits.IRCF=7;       //change clock to a faster one            
+
+            /*
+            display.number=speed;
+            display.dot1=~display.dot1;
+            lcdDisplayAll(display);
             
             speed++;
-            if(speed>9)
+            if(speed>99)
                 speed=0;
+            */
+
+            display.number=timer1CountedTicks/4;
+            display.dot1=~display.dot1;
+            lcdDisplayAll(display);
+
             OSCCONbits.IRCF=0;       //and back to the slower clock
             OPTION_REGbits.TMR0CS=0; //enable timer 0
         }

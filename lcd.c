@@ -70,7 +70,7 @@ void lcdInit(void)
     LCDCST=0;
     LCDSE0=0xFF;
     LCDSE1=0xF7; //enable SEG8, 9, 10,   12, 13, 14, 15 enabled
-    LCDSE3=0x01; //enable SEG24
+    LCDSE3=0xFF; //enable SEG24
     LCDRLbits.LRLAP=2;
     LCDRLbits.LRLBP=2;
 }

@@ -248,3 +248,24 @@ void display(uint8_t number, display_mode_e mode)
        LCDDATA0|=SEG_P;
 }
 */
+
+
+
+            display.number=speed;
+            display.dot1=~display.dot1;
+            lcdDisplayAll(display);
+
+            speed++;
+            if(speed>99)
+                speed=0;
+
+
+            /*display.number=timer1CountedbTicks/4;*/
+            //display.number=88;
+            //display.dot1=~display.dot1;
+
+            //LCDDATA0=0xFF;
+            //LCDDATA1=0xFF;
+            //LCDDATA12=0xFF;
+
+            //lcdDisplayAll(display);

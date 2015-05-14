@@ -1,10 +1,12 @@
-___awdiv: CODE, 298 0 84
-___awmod: CODE, 537 0 72
-_main: CODE, 382 0 82
-_lcdDisplayAll: CODE, 464 0 73
-_my_interrupt: CODE, 4 0 35
-__initialization: CODE, 40 0 14
-_lcdDisplayCharacter: CODE, 57 0 241
-_lcdInit: CODE, 609 0 37
-_segmentsToLCDDataRegisters: STRCODE, 768 0 16
-Total: 654
+___awdiv: CODE, 431 0 84
+___awmod: CODE, 588 0 72
+_main: CODE, 300 0 131
+_lcdDisplayAll: CODE, 515 0 73
+_my_interrupt: CODE, 4 0 36
+__initialization: CODE, 41 0 15
+___lwdiv: CODE, 660 0 55
+_lcdDisplayCharacter: CODE, 59 0 241
+_lcdInit: CODE, 715 0 37
+_segmentsToLCDDataRegisters: STRCODE, 1024 0 16
+___wmul: CODE, 752 0 29
+Total: 789

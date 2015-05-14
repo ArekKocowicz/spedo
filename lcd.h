@@ -39,8 +39,8 @@ typedef struct
 
 #ifdef MODULE_LCD
 
-#define BREADBOARD_CIRCUIT
-//#define PCB_REV_1
+//#define BREADBOARD_CIRCUIT
+#define PCB_REV_1
 
 #ifdef BREADBOARD_CIRCUIT
 /*
@@ -75,22 +75,22 @@ const uint8_t segmentsToLCDDataRegisters[2][8]=
  * s - segment for which DATA register addres is searched
  */
 const uint8_t segmentsToLCDDataRegisters[2][8]=
-{   {0*8+5,  //LCDDATA0, bit 5, first digit, SEG_A
-     0*8+4,  //LCDDATA0, bit 4, first digit, SEG_B
-     0*8+3,  //LCDDATA0, bit 3, first digit, SEG_C
-     0*8+2,  //LCDDATA0, bit 2, first digit, SEG_D
-     0*8+1,  //LCDDATA0, bit 1, first digit, SEG_E
+{   {12*8+1,  //LCDDATA0, bit 5, first digit, SEG_A
+     12*8+0,  //LCDDATA0, bit 4, first digit, SEG_B
+     1*8+7,  //LCDDATA0, bit 3, first digit, SEG_C
+     0*8+5,  //LCDDATA0, bit 2, first digit, SEG_D
+     0*8+7,  //LCDDATA0, bit 1, first digit, SEG_E
      0*8+6,  //LCDDATA0, bit 6, first digit, SEG_F
-     0*8+7,  //LCDDATA0, bit 7, first digit, SEG_G
-     0*8+0}, //LCDDATA0, bit 0, first digit, SEG_DP
-    {1*8+5,  //LCDDATA1, bit 5, second digit, SEG_A
-     1*8+4,  //LCDDATA1, bit 4, second digit, SEG_B
-     12*8+0, //LCDDATA12, bit 0, second digit, SEG_C
-     1*8+2,  //LCDDATA1, bit 2, second digit, SEG_D
-     1*8+1,  //LCDDATA1, bit 1, second digit, SEG_E
-     1*8+6,  //LCDDATA1, bit 6, second digit, SEG_F
-     1*8+7,  //LCDDATA1, bit 7, second digit, SEG_G
-     1*8+0}  //LCDDATA1, bit 0, second digit, SEG_DP
+     0*8+3,  //LCDDATA0, bit 7, first digit, SEG_G
+     1*8+4}, //LCDDATA0, bit 0, first digit, SEG_DP
+    {1*8+1,  //LCDDATA1, bit 5, second digit, SEG_A
+     1*8+2,  //LCDDATA1, bit 4, second digit, SEG_B
+     1*8+5, //LCDDATA12, bit 0, second digit, SEG_C
+     1*8+6,  //LCDDATA1, bit 2, second digit, SEG_D
+     12*8+2,  //LCDDATA1, bit 1, second digit, SEG_E
+     1*8+0,  //LCDDATA1, bit 6, second digit, SEG_F
+     0*8+0,  //LCDDATA1, bit 7, second digit, SEG_G
+     0*8+4}  //LCDDATA1, bit 0, second digit, SEG_DP
 };
 #endif
 

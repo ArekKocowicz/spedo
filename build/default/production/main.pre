@@ -2558,13 +2558,13 @@ extern void lcdDisplayAll(lcd_display_t display);
 #pragma config PWRTE = OFF
 #pragma config MCLRE = ON
 #pragma config CP = OFF
-#pragma config BOREN = OFF
+#pragma config BOREN = ON
 #pragma config CLKOUTEN = OFF
 
 
 #pragma config WRT = OFF
 #pragma config STVREN = ON
-#pragma config BORV = HI
+#pragma config BORV = LO
 #pragma config LPBOR = OFF
 #pragma config LVP = ON
 
@@ -2579,12 +2579,12 @@ DISPLAY_MODE_NUMBER
 
 struct status_t
 {
-unsigned tick:1;
+unsigned bTick:1;
+unsigned bNewRawPeriod:1;
 }status;
 
-uint16_t timer1CountedTicks=(65535U);
-uint8_t speed;
-
+uint16_t u16RawPeriod=(65535U);
+uint16_t speed;
 lcd_display_t display;
 
 void main(void)
@@ -2594,6 +2594,7 @@ ANSELA=0;
 ANSELB=0;
 TRISB=0;
 TRISA=0;
+TRISCbits.TRISC4=1;
 
 lcdInit();
 
@@ -2601,7 +2602,7 @@ INTCONbits.TMR0IF=0;
 INTCONbits.TMR0IE=1;
 OPTION_REGbits.TMR0CS=0;
 OPTION_REGbits.PSA=0;
-OPTION_REGbits.PS=3;
+OPTION_REGbits.PS=2;
 
 
 TMR1H=0;
@@ -2611,7 +2612,7 @@ PIE1bits.TMR1GIE=1;
 T1CONbits.TMR1CS=2;
 T1CONbits.T1OSCEN=1;
 
-T1CONbits.T1CKPS=3;
+T1CONbits.T1CKPS=2;
 T1CONbits.nT1SYNC=1;
 T1GCONbits.T1GSS=0;
 T1GCONbits.TMR1GE=1;
@@ -2619,20 +2620,31 @@ T1GCONbits.T1GPOL=1;
 T1GCONbits.T1GTM=1;
 T1CONbits.TMR1ON=1;
 
+status.bTick=0;
+status.bNewRawPeriod=0;
+
 while(1)
 {
-if(status.tick)
+if(status.bTick)
 {
-status.tick=0;
-
+status.bTick=0;
 OPTION_REGbits.TMR0CS=1;
 OSCCONbits.IRCF=7;
-
-# 93
-display.number=timer1CountedTicks/4;
+if(status.bNewRawPeriod)
+{
+status.bNewRawPeriod=0;
+u16RawPeriod*=(13);
+speed=295*(200)/u16RawPeriod;
+if(speed>99)
+speed=99;
+display.number=speed;
+}
+else
+{
+display.number=0;
+}
 display.dot1=~display.dot1;
 lcdDisplayAll(display);
-
 OSCCONbits.IRCF=0;
 OPTION_REGbits.TMR0CS=0;
 }
@@ -2645,15 +2657,16 @@ void interrupt my_interrupt(void)
 if(PIR1bits.TMR1GIF)
 {
 PIR1bits.TMR1GIF=0;
-timer1CountedTicks=TMR1L;
-timer1CountedTicks|=(TMR1H<<8);
+u16RawPeriod=TMR1L;
+u16RawPeriod|=(TMR1H<<8);
 TMR1H=0;
 TMR1L=0;
+status.bNewRawPeriod=1;
 }
 
 if(INTCONbits.TMR0IF)
 {
 INTCONbits.TMR0IF=0;
-status.tick=1;
+status.bTick=1;
 }
 }

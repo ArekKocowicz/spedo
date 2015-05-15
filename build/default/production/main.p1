@@ -2060,9 +2060,9 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;main.c: 88: u16RawPeriod*=(13);
 "88
 [e =* _u16RawPeriod -> -> 13 `i `ui ]
-[; ;main.c: 89: speed=295*(200)/u16RawPeriod;
+[; ;main.c: 89: speed=295*(220)/u16RawPeriod;
 "89
-[e = _speed / -> * -> 295 `i -> 200 `i `ui _u16RawPeriod ]
+[e = _speed / -> * -> 295 `i -> 220 `i `ui _u16RawPeriod ]
 [; ;main.c: 90: if(speed>99)
 "90
 [e $ ! > _speed -> -> 99 `i `ui 211  ]

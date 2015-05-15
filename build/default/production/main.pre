@@ -2634,7 +2634,7 @@ if(status.bNewRawPeriod)
 {
 status.bNewRawPeriod=0;
 u16RawPeriod*=(13);
-speed=295*(200)/u16RawPeriod;
+speed=295*(220)/u16RawPeriod;
 if(speed>99)
 speed=99;
 display.number=speed;

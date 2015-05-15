@@ -20,7 +20,7 @@
 #pragma config LPBOR = OFF      // Low-Power Brown-out Reset (Low-Power BOR is disabled)
 #pragma config LVP = ON         // Low-Voltage Programming Enable (Low-voltage programming enabled)
 
-#define WHEEL_CIRCUMFERENCE_CM (200)
+#define WHEEL_CIRCUMFERENCE_CM (220)
 #define MAGNET_POLES_NUMBER (13)
 
 typedef enum

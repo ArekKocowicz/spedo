@@ -6,18 +6,23 @@ void lcdDisplayAll(lcd_display_t display)
 {
     lcd_character_t character0, character1;
 
-    if(display.blank)
-    { 
-        character0.character=10;
-        character0.character=10;
+    if(display.blank){ 
+        character0.character=16; 
+        character0.character=16;
     }
-    else
-    {
+    else{
+        if(display.hex){
+        character0.character=display.number/16;
+        character1.character=display.number%16;
+        //display in hex mode doesn't blank leading zero
+        }
+        else{
         character0.character=display.number/10;
         character1.character=display.number%10;
-        if(character0.character==0)
-            character0.character=11;
-
+        //blank leading zero
+        if((display.number/10)==0)
+            character0.character=17;
+        }
     }
     character0.dot=display.dot1;
     character1.dot=display.dot2;
@@ -50,11 +55,6 @@ void lcdDisplayCharacter(lcd_character_t character, uint8_t lcdPosition)
 
 void lcdInit(void)
 {
-        //LCD configuration
-    OSCCONbits.IRCF=0;       //drive micro from LFOSC 32kHz
-    INTCONbits.GIE=1;        //turn the interrupts on
-    INTCONbits.PEIE=1;       //turn on peripheral interrupts
-
     LCDCONbits.LCDEN=1;
     LCDCONbits.WERR=0;
     LCDCONbits.CS=2;    //drive LCD from LFINTOSC
@@ -70,6 +70,7 @@ void lcdInit(void)
     LCDCST=0;
     LCDSE0=0xFF;
     LCDSE1=0xF7; //enable SEG8, 9, 10,   12, 13, 14, 15 enabled
+    LCDSE1bits.SE8=0;
     LCDSE3=0xFF; //enable SEG24
     LCDRLbits.LRLAP=2;
     LCDRLbits.LRLBP=2;

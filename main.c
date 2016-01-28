@@ -21,7 +21,6 @@
 #pragma config LPBOR = OFF      // Low-Power Brown-out Reset (Low-Power BOR is disabled)
 #pragma config LVP = ON         // Low-Voltage Programming Enable (Low-voltage programming enabled)
 
-//#define WHEEL_CIRCUMFERENCE_CM (220)
 #define MAGNET_POLES_NUMBER (13)
 
 #define WHEEL_CIRCUMFERENCE_FLASH_ADDRESS (0x1FF0)
@@ -138,15 +137,18 @@ void main(void)
                 display.hex=1;
                 lcdDisplayAll(display);
             }
-            if(status.bCharReceived){
+            if(status.bCharReceived)
+            {
                 status.bCharReceived=0;
-                my_flash_erase(WHEEL_CIRCUMFERENCE_FLASH_ADDRESS);
                 temp=receivedCharacter;
-                my_flash_write(WHEEL_CIRCUMFERENCE_FLASH_ADDRESS,&temp,1);
-                wheel_circumference_cm=my_flash_read(WHEEL_CIRCUMFERENCE_FLASH_ADDRESS);
-                display.number=wheel_circumference_cm;
-                display.hex=1;
-                lcdDisplayAll(display);
+                if(temp>50 && temp!= 0xFF){
+                    my_flash_erase(WHEEL_CIRCUMFERENCE_FLASH_ADDRESS);
+                    my_flash_write(WHEEL_CIRCUMFERENCE_FLASH_ADDRESS,&temp,1);
+                    wheel_circumference_cm=my_flash_read(WHEEL_CIRCUMFERENCE_FLASH_ADDRESS);
+                    display.number=wheel_circumference_cm;
+                    display.hex=1;
+                    lcdDisplayAll(display);
+                }
             }
             
             
@@ -170,6 +172,7 @@ void interrupt my_interrupt(void){
     }
     if(PIR1bits.RCIF){
         receivedCharacter=RCREG;
-        status.bCharReceived=1;
+        if(RCSTA1bits.FERR==0 && RCSTA1bits.OERR==0)
+            status.bCharReceived=1;
     }
 }
